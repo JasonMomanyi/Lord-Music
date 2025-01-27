@@ -2,6 +2,7 @@ const API_KEY = 'AIzaSyB8u15oeNn6udP6KgDPOQvWMCliTr4FOY0';
 const PLAYLIST_ID = 'RDEM-WYNGIdEFjn8H41ugynh2w'; // Only the playlist ID part
 let currentSongIndex = 0;
 let playlist = [];
+let isPlaying = false;
 
 fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST_ID}&key=${API_KEY}&maxResults=25`)
   .then(response => response.json())
@@ -17,6 +18,7 @@ fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlist
 function playSong(videoId) {
   if (player && player.loadVideoById) {
     player.loadVideoById(videoId);
+    isPlaying = true;
   } else {
     console.error('Player is not ready.');
   }
@@ -77,6 +79,7 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerReady(event) {
   event.target.playVideo();
+  isPlaying = true;
 }
 
 function onPlayerStateChange(event) {
@@ -84,3 +87,16 @@ function onPlayerStateChange(event) {
     nextSong();
   }
 }
+
+// Handle page visibility change
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (isPlaying) {
+      player.pauseVideo();
+    }
+  } else {
+    if (isPlaying) {
+      player.playVideo();
+    }
+  }
+});
