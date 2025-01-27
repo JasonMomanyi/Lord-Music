@@ -1,16 +1,15 @@
 const API_KEY = 'AIzaSyB8u15oeNn6udP6KgDPOQvWMCliTr4FOY0';
-const API_URL = 'https://www.googleapis.com/youtube/v3/search';
-const searchQuery = 'song name artist';
+const PLAYLIST_ID = 'RDEM-WYNGIdEFjn8H41ugynh2w'; // Only the playlist ID part
 let currentSongIndex = 0;
 let playlist = [];
 
-fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${searchQuery}&key=${API_KEY}`)
+fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST_ID}&key=${API_KEY}&maxResults=25`)
   .then(response => response.json())
   .then(data => {
     playlist = data.items;
     loadPlaylist(playlist);
     if (playlist.length > 0) {
-      playSong(playlist[0].id.videoId);
+      playSong(playlist[0].snippet.resourceId.videoId);
     }
   })
   .catch(error => console.error('Error fetching YouTube data:', error));
@@ -26,14 +25,14 @@ function playSong(videoId) {
 function nextSong() {
   if (playlist.length > 0) {
     currentSongIndex = (currentSongIndex + 1) % playlist.length;
-    playSong(playlist[currentSongIndex].id.videoId);
+    playSong(playlist[currentSongIndex].snippet.resourceId.videoId);
   }
 }
 
 function previousSong() {
   if (playlist.length > 0) {
     currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-    playSong(playlist[currentSongIndex].id.videoId);
+    playSong(playlist[currentSongIndex].snippet.resourceId.videoId);
   }
 }
 
@@ -42,7 +41,7 @@ function loadPlaylist(data) {
   playlistElement.innerHTML = ''; // Clear existing playlist items
   data.forEach((item, index) => {
     const songData = item.snippet;
-    const videoId = item.id.videoId;
+    const videoId = songData.resourceId.videoId;
     const title = songData.title;
     const artist = songData.channelTitle;
     const thumbnail = songData.thumbnails.default.url;
